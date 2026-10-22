@@ -1,6 +1,6 @@
-# Feto 67 — Campanha Paupiteiros
+# Feto 67 â€” Campanha Paupiteiros
 
-Site oficial da campanha de **Ruan Ranison (Feto)** a administrador do grupo WhatsApp Paupiteiros. Número eleitoral: **67**.
+Site oficial da campanha de **Ruan Ranison (Feto)** a administrador do grupo WhatsApp Paupiteiros. NÃºmero eleitoral: **67**.
 
 ## URL
 
@@ -16,4 +16,4 @@ npx serve .
 
 ## Stack
 
-HTML, CSS e JavaScript estáticos — publicado via GitHub Pages.
+HTML, CSS e JavaScript estÃ¡ticos â€” publicado via GitHub Pages.

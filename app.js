@@ -8,7 +8,7 @@
 
   const pageUrl = window.location.href.split("#")[0];
   const shareText =
-    "Vote 67 — Feto (Ruan Ranison) para administrador do Paupiteiros. Conheça a campanha: " +
+    "Vote 67 â€” Feto (Ruan Ranison) para administrador do Paupiteiros. ConheÃ§a a campanha: " +
     pageUrl;
 
   if (shareBtn) {

@@ -657,7 +657,7 @@ a {
 }
 
 .faq details[open] summary::after {
-  content: "–";
+  content: "â€“";
 }
 
 .faq details p {
