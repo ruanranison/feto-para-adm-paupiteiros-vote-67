@@ -284,7 +284,7 @@ a {
   width: 100%;
   aspect-ratio: 4 / 5;
   object-fit: cover;
-  object-position: center 16%;
+  object-position: center 42%;
   border-radius: var(--radius);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
@@ -498,23 +498,35 @@ a {
   max-width: 32ch;
 }
 
-/* Feitos — grid compacto (cabe na âncora/viewport) */
+/* Feitos — grid que preenche a viewport da âncora */
 .section--feitos {
-  justify-content: center;
+  justify-content: stretch;
   overflow: hidden;
 }
 
+.section--feitos .wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-height: calc(100dvh - var(--nav-h) - 3.5rem);
+}
+
 .section__head--compact {
-  margin-bottom: 0.9rem;
+  margin-bottom: 1.1rem;
+  flex-shrink: 0;
 }
 
 .feitos {
   list-style: none;
   margin: 0;
   padding: 0;
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 0.65rem;
+  grid-auto-rows: 1fr;
+  gap: 0.9rem;
+  align-content: stretch;
 }
 
 .feitos li {
@@ -522,11 +534,11 @@ a {
   grid-column: span 3;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  min-height: 0;
-  padding: 0.85rem 0.9rem 0.95rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(126, 176, 239, 0.22);
+  gap: 0.45rem;
+  min-height: 10.5rem;
+  padding: 1.25rem 1.2rem 1.3rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(126, 176, 239, 0.28);
   border-radius: var(--radius);
   transition:
     background 0.2s ease,
@@ -535,8 +547,8 @@ a {
 }
 
 .feitos li:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(126, 176, 239, 0.45);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(126, 176, 239, 0.5);
   transform: translateY(-2px);
 }
 
@@ -549,9 +561,9 @@ a {
   display: inline-flex;
   align-self: start;
   align-items: center;
-  padding: 0.15rem 0.5rem;
+  padding: 0.25rem 0.65rem;
   font-family: var(--font-display);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -564,16 +576,16 @@ a {
 .feitos h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 0.98rem;
+  font-size: clamp(1.05rem, 1.5vw, 1.2rem);
   font-weight: 700;
   line-height: 1.25;
 }
 
 .feitos p {
   margin: 0;
-  font-size: 0.86rem;
-  line-height: 1.45;
-  color: rgba(247, 249, 252, 0.82);
+  font-size: clamp(0.92rem, 1.2vw, 1rem);
+  line-height: 1.5;
+  color: rgba(247, 249, 252, 0.84);
 }
 
 .feitos a {
@@ -589,9 +601,10 @@ a {
 }
 
 .feitos__addr {
-  margin-top: 0.15rem !important;
-  font-size: 0.75rem !important;
-  line-height: 1.35 !important;
+  margin-top: auto !important;
+  padding-top: 0.35rem;
+  font-size: 0.82rem !important;
+  line-height: 1.4 !important;
   color: rgba(247, 249, 252, 0.62) !important;
 }
 
@@ -871,7 +884,7 @@ a {
   width: 140px;
   height: 140px;
   object-fit: cover;
-  object-position: center top;
+  object-position: center 42%;
   border-radius: 50%;
   box-shadow: 0 0 0 3px var(--white), 0 0 0 5px rgba(27, 79, 156, 0.35);
 }
@@ -1118,7 +1131,7 @@ a {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  object-position: center top;
+  object-position: center 42%;
   border: 2px solid #3d9a58;
   background: #062214;
 }
@@ -1312,14 +1325,21 @@ a {
     overflow: visible;
   }
 
+  .section--feitos .wrap {
+    min-height: 0;
+  }
+
   .feitos {
     grid-template-columns: repeat(2, 1fr);
-    gap: 0.55rem;
+    grid-auto-rows: auto;
+    gap: 0.7rem;
   }
 
   .feitos li,
   .feitos li:nth-child(n + 5) {
     grid-column: auto;
+    min-height: 8.5rem;
+    padding: 1.1rem 1rem 1.15rem;
   }
 
   .feitos li:last-child {
