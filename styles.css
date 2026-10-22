@@ -498,110 +498,101 @@ a {
   max-width: 32ch;
 }
 
-/* Timeline */
-.timeline {
+/* Feitos — grid compacto (cabe na âncora/viewport) */
+.section--feitos {
+  justify-content: center;
+  overflow: hidden;
+}
+
+.section__head--compact {
+  margin-bottom: 0.9rem;
+}
+
+.feitos {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 0.35rem;
-  position: relative;
+  padding: 0;
   display: grid;
-  gap: 0.85rem;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.65rem;
 }
 
-.timeline::before {
-  content: "";
-  position: absolute;
-  left: 0.55rem;
-  top: 0.4rem;
-  bottom: 0.4rem;
-  width: 2px;
-  background: rgba(74, 134, 212, 0.35);
-}
-
-.timeline li {
+.feitos li {
   position: relative;
-  display: grid;
-  grid-template-columns: 7.25rem 1fr;
-  gap: 1rem 1.15rem;
-  padding: 1.1rem 1.15rem 1.1rem 1.75rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--line-light);
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 0;
+  padding: 0.85rem 0.9rem 0.95rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(126, 176, 239, 0.22);
   border-radius: var(--radius);
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.25s var(--ease);
 }
 
-.timeline li::before {
-  content: "";
-  position: absolute;
-  left: 0.3rem;
-  top: 1.35rem;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
-  background: var(--blue-soft);
-  box-shadow: 0 0 0 3px rgba(11, 31, 58, 0.9);
-  z-index: 1;
+.feitos li:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(126, 176, 239, 0.45);
+  transform: translateY(-2px);
 }
 
-.timeline li:last-child {
-  border-bottom: 1px solid var(--line-light);
+/* Segunda linha: 3 cards iguais (4+4+4) */
+.feitos li:nth-child(n + 5) {
+  grid-column: span 4;
 }
 
-.timeline li:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(74, 134, 212, 0.45);
-}
-
-.timeline time {
+.feitos__tag {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
   align-self: start;
-  min-height: 1.85rem;
-  padding: 0.2rem 0.65rem;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: #e8f1ff;
-  background: rgba(46, 107, 199, 0.45);
+  background: rgba(46, 107, 199, 0.5);
   border: 1px solid rgba(126, 176, 239, 0.35);
   border-radius: 999px;
-  white-space: nowrap;
 }
 
-.timeline h3 {
-  margin: 0 0 0.4rem;
+.feitos h3 {
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 1.12rem;
+  font-size: 0.98rem;
   font-weight: 700;
   line-height: 1.25;
 }
 
-.timeline p {
+.feitos p {
   margin: 0;
-  max-width: 58ch;
-  font-size: 0.98rem;
-  line-height: 1.6;
-  color: rgba(247, 249, 252, 0.84);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: rgba(247, 249, 252, 0.82);
 }
 
-.timeline a {
+.feitos a {
   color: #9ec5f5;
   font-weight: 600;
   text-decoration: underline;
-  text-underline-offset: 0.18em;
+  text-underline-offset: 0.15em;
 }
 
-.timeline a:hover,
-.timeline a:focus-visible {
+.feitos a:hover,
+.feitos a:focus-visible {
   color: #c5ddff;
 }
 
-.timeline .feito-addr {
-  display: block;
-  margin-top: 0.45rem;
-  font-size: 0.88rem;
-  color: rgba(247, 249, 252, 0.68);
+.feitos__addr {
+  margin-top: 0.15rem !important;
+  font-size: 0.75rem !important;
+  line-height: 1.35 !important;
+  color: rgba(247, 249, 252, 0.62) !important;
 }
 
 /* Proposals */
@@ -1317,14 +1308,22 @@ a {
     padding: 1.15rem 1rem;
   }
 
-  .timeline {
-    padding-left: 0.15rem;
+  .section--feitos {
+    overflow: visible;
   }
 
-  .timeline li {
-    grid-template-columns: 1fr;
+  .feitos {
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.55rem;
-    padding: 1rem 1rem 1rem 1.65rem;
+  }
+
+  .feitos li,
+  .feitos li:nth-child(n + 5) {
+    grid-column: auto;
+  }
+
+  .feitos li:last-child {
+    grid-column: 1 / -1;
   }
 
   .proposals {
