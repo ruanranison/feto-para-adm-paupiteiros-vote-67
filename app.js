@@ -8,7 +8,7 @@
 
   const pageUrl = window.location.href.split("#")[0];
   const shareText =
-    "Vote 67 — Feto (Ruan Ranison) para administrador do Paupiteiros. Conheça a campanha: " +
+    "Vote 67 â€” Feto (Ruan Ranison) para administrador do Paupiteiros. ConheÃ§a a campanha: " +
     pageUrl;
 
   if (shareBtn) {
@@ -45,7 +45,7 @@
     });
   }
 
-  /* Urna eletrônica */
+  /* Urna eletrÃ´nica */
   const digitsEl = document.getElementById("urnaDigits");
   const candidateEl = document.getElementById("urnaCandidate");
   const msgEl = document.getElementById("urnaMsg");
@@ -71,16 +71,16 @@
     if (locked) return;
 
     if (digits.length === 0) {
-      msgEl.textContent = "Digite o número do candidato";
+      msgEl.textContent = "Digite o nÃºmero do candidato";
       msgEl.classList.remove("is-ok");
     } else if (isFeto) {
       msgEl.textContent = "Candidato encontrado. Aperte CONFIRMA.";
       msgEl.classList.remove("is-ok");
     } else if (digits.length >= 2) {
-      msgEl.textContent = "Número inválido nesta campanha. Use CORRIGE.";
+      msgEl.textContent = "NÃºmero invÃ¡lido nesta campanha. Use CORRIGE.";
       msgEl.classList.remove("is-ok");
     } else {
-      msgEl.textContent = "Continue digitando…";
+      msgEl.textContent = "Continue digitandoâ€¦";
       msgEl.classList.remove("is-ok");
     }
   }
@@ -115,7 +115,7 @@
     if (locked) return;
     if (digits === "67") {
       locked = true;
-      msgEl.textContent = "Voto registrado · 67 · Feto";
+      msgEl.textContent = "Voto registrado Â· 67 Â· Feto";
       msgEl.classList.add("is-ok");
       return;
     }
@@ -123,7 +123,7 @@
       msgEl.textContent = "Digite 67 antes de confirmar.";
       return;
     }
-    msgEl.textContent = "Só o 67 confirma nesta urna. Use CORRIGE.";
+    msgEl.textContent = "SÃ³ o 67 confirma nesta urna. Use CORRIGE.";
   }
 
   pad.querySelectorAll("button[data-key]").forEach(function (btn) {
