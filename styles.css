@@ -534,6 +534,18 @@ a {
   color: rgba(247, 249, 252, 0.76);
 }
 
+.timeline a {
+  color: var(--blue-soft);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.timeline a:hover,
+.timeline a:focus-visible {
+  color: #7eb0ef;
+}
+
 /* Proposals */
 .proposals {
   list-style: none;
