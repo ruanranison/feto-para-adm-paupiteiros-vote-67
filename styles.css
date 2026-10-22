@@ -880,7 +880,7 @@ a {
   width: 140px;
   height: 140px;
   object-fit: cover;
-  object-position: center 8%;
+  object-position: center top;
   border-radius: 50%;
   box-shadow: 0 0 0 3px var(--white), 0 0 0 5px rgba(27, 79, 156, 0.35);
 }
@@ -1127,7 +1127,7 @@ a {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  object-position: center 8%;
+  object-position: center top;
   border: 2px solid #3d9a58;
   background: #062214;
 }
