@@ -56,6 +56,20 @@
 
   if (!digitsEl || !candidateEl || !msgEl || !pad) return;
 
+  const audioBase = "assets/audio/";
+  const sndKey = new Audio(audioBase + "key.wav");
+  const sndConfirm = new Audio(audioBase + "confirm.wav");
+  sndKey.preload = "auto";
+  sndConfirm.preload = "auto";
+
+  function playSound(audio) {
+    try {
+      audio.currentTime = 0;
+      const p = audio.play();
+      if (p && typeof p.catch === "function") p.catch(function () {});
+    } catch (err) {}
+  }
+
   let digits = "";
   let locked = false;
 
@@ -80,7 +94,7 @@
       msgEl.textContent = "Número inválido nesta campanha. Use CORRIGE.";
       msgEl.classList.remove("is-ok");
     } else {
-      msgEl.textContent = "Continue digitando…";
+      msgEl.textContent = "Continue digitando...";
       msgEl.classList.remove("is-ok");
     }
   }
@@ -89,6 +103,7 @@
     if (locked) return;
     if (digits.length >= 2) return;
     digits += String(d);
+    playSound(sndKey);
     render();
   }
 
@@ -97,6 +112,7 @@
     digits = "";
     candidateEl.hidden = true;
     msgEl.classList.remove("is-ok");
+    playSound(sndKey);
     render();
   }
 
@@ -109,6 +125,7 @@
     digitsEl.querySelectorAll(".urna__slot").forEach(function (slot) {
       slot.textContent = "_";
     });
+    playSound(sndKey);
   }
 
   function confirma() {
@@ -117,6 +134,7 @@
       locked = true;
       msgEl.textContent = "Voto registrado · 67 · Feto";
       msgEl.classList.add("is-ok");
+      playSound(sndConfirm);
       return;
     }
     if (digits.length === 0) {
