@@ -8,7 +8,7 @@
 
   const pageUrl = window.location.href.split("#")[0];
   const shareText =
-    "Vote 67: Feto (Ruan Ranison) para administrador do Paupiteiros. ConheÃ§a a campanha: " +
+    "Vote 67: Feto (Ruan Ranison) para administrador do Paupiteiros — chapa com Doson's e José Marcos. Fim da 424, nova era da 924. Conheça a campanha: " +
     pageUrl;
 
   if (shareBtn) {
