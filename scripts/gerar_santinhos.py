@@ -1,115 +1,65 @@
 #!/usr/bin/env python3
-"""Gera santinhos Feto 67 (frente + verso/cola) — foto antiga e foto nova."""
+"""
+Santinhos eleitorais Feto 67 — padrão clássico brasileiro 7×10.
+Frente e verso com a mesma identidade visual (azul campanha).
+Referências: TSE (cola), Expo/Printi/Alvo (santinho 7×10, foto + número).
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "assets" / "santinhos"
-W, H = 1080, 1543  # ~7x10 cm digital
+W, H = 1080, 1543  # ~7×10 cm @ ~390 dpi
 
+# Identidade da campanha (frente = verso)
 NAVY = (11, 31, 58)
-NAVY_MID = (18, 48, 86)
 BLUE = (27, 79, 156)
 BLUE_BRIGHT = (46, 107, 199)
-PAPER = (244, 247, 251)
+BLUE_BAND = (37, 94, 180)
+PAPER = (247, 249, 252)
 WHITE = (255, 255, 255)
-INK = (11, 31, 58)
-GREEN_URN = (6, 34, 20)
-GREEN_SOFT = (157, 255, 176)
-GREEN_OK = (61, 154, 88)
+MUTED = (90, 110, 140)
+YELLOW = (255, 214, 10)  # destaque clássico de número em santinho BR
 
 FONT_DIR = Path("/System/Library/Fonts/Supplemental")
-FONT_BOLD = FONT_DIR / "Arial Bold.ttf"
-FONT_BLACK = FONT_DIR / "Arial Black.ttf"
-FONT_REG = FONT_DIR / "Arial.ttf"
-FONT_NUM = FONT_DIR / "DIN Condensed Bold.ttf"
-FONT_DISPLAY = FONT_DIR / "Arial Rounded Bold.ttf"
+F_BLACK = FONT_DIR / "Arial Black.ttf"
+F_BOLD = FONT_DIR / "Arial Bold.ttf"
+F_REG = FONT_DIR / "Arial.ttf"
+F_NUM = FONT_DIR / "DIN Condensed Bold.ttf"
 
 
-def font(path: Path, size: int) -> ImageFont.FreeTypeFont:
+def fnt(path: Path, size: int) -> ImageFont.FreeTypeFont:
     try:
         return ImageFont.truetype(str(path), size)
     except OSError:
-        return ImageFont.truetype(str(FONT_BOLD), size)
+        return ImageFont.truetype(str(F_BOLD), size)
 
 
-def gradient_bg(top=NAVY, bottom=NAVY_MID) -> Image.Image:
-    img = Image.new("RGB", (W, H), top)
-    px = img.load()
-    for y in range(H):
-        t = y / (H - 1)
-        r = int(top[0] + (bottom[0] - top[0]) * t)
-        g = int(top[1] + (bottom[1] - top[1]) * t)
-        b = int(top[2] + (bottom[2] - top[2]) * t)
-        for x in range(W):
-            px[x, y] = (r, g, b)
-    return img
+def text_w(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.ImageFont) -> int:
+    b = draw.textbbox((0, 0), text, font=font)
+    return b[2] - b[0]
 
 
-def cover_crop(
-    src: Image.Image,
-    box: tuple[int, int, int, int],
-    focus=(0.5, 0.35),
-    face_in_frame=0.32,
-) -> Image.Image:
-    """Crop-cover into box; place focus point near upper third of the frame."""
-    x0, y0, x1, y1 = box
-    tw, th = x1 - x0, y1 - y0
-    sw, sh = src.size
-    scale = max(tw / sw, th / sh)
-    nw, nh = int(sw * scale), int(sh * scale)
-    resized = src.resize((nw, nh), Image.Resampling.LANCZOS)
-    cx, cy = int(nw * focus[0]), int(nh * focus[1])
-    left = max(0, min(cx - tw // 2, nw - tw))
-    # face_in_frame: 0 = top, 0.5 = center — keep face high in the card
-    top = max(0, min(cy - int(th * face_in_frame), nh - th))
-    cropped = resized.crop((left, top, left + tw, top + th))
-    return cropped
+def text_h(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.ImageFont) -> int:
+    b = draw.textbbox((0, 0), text, font=font)
+    return b[3] - b[1]
 
 
-def rounded_mask(size: tuple[int, int], radius: int) -> Image.Image:
-    m = Image.new("L", size, 0)
-    d = ImageDraw.Draw(m)
-    d.rounded_rectangle((0, 0, size[0] - 1, size[1] - 1), radius=radius, fill=255)
-    return m
+def center_text(draw, text, y, font, fill=WHITE):
+    tw = text_w(draw, text, font)
+    draw.text(((W - tw) // 2, y), text, font=font, fill=fill)
 
 
-def paste_photo(base: Image.Image, photo: Image.Image, box, focus, radius=28, border=8):
-    x0, y0, x1, y1 = box
-    inner = (x0 + border, y0 + border, x1 - border, y1 - border)
-    frame = Image.new("RGB", (x1 - x0, y1 - y0), WHITE)
-    base.paste(frame, (x0, y0))
-    # blue outer stroke
-    draw = ImageDraw.Draw(base)
-    draw.rounded_rectangle(box, radius=radius + 4, outline=BLUE_BRIGHT, width=6)
-
-    crop = cover_crop(photo, (0, 0, inner[2] - inner[0], inner[3] - inner[1]), focus)
-    mask = rounded_mask(crop.size, radius)
-    base.paste(crop, (inner[0], inner[1]), mask)
-
-
-def text_center(draw, text, y, fnt, fill=WHITE, max_w=None):
-    bbox = draw.textbbox((0, 0), text, font=fnt)
-    tw = bbox[2] - bbox[0]
-    x = (W - tw) // 2
-    if max_w and tw > max_w:
-        # shrink somehow — caller should pick size
-        pass
-    draw.text((x, y), text, font=fnt, fill=fill)
-    return bbox[3] - bbox[1]
-
-
-def wrap_center(draw, text, y, fnt, fill, max_w, line_gap=8):
+def wrap_center(draw, text, y, font, fill, max_w, gap=6):
     words = text.split()
-    lines = []
-    cur = ""
+    lines, cur = [], ""
     for w in words:
-        trial = (cur + " " + w).strip()
-        if draw.textbbox((0, 0), trial, font=fnt)[2] <= max_w:
+        trial = f"{cur} {w}".strip()
+        if text_w(draw, trial, font) <= max_w:
             cur = trial
         else:
             if cur:
@@ -119,150 +69,175 @@ def wrap_center(draw, text, y, fnt, fill, max_w, line_gap=8):
         lines.append(cur)
     cy = y
     for line in lines:
-        text_center(draw, line, cy, fnt, fill)
-        cy += draw.textbbox((0, 0), line, font=fnt)[3] + line_gap
+        center_text(draw, line, cy, font, fill)
+        cy += text_h(draw, line, font) + gap
     return cy
 
 
-def make_frente(photo_path: Path, out_path: Path, *, nova: bool, focus):
+def face_crop(src: Image.Image, tw: int, th: int, focus=(0.5, 0.42), zoom=1.35) -> Image.Image:
+    """Close crop estilo santinho: rosto grande, pouco fundo acima."""
+    sw, sh = src.size
+    # zoom > 1 = mais close (escala maior que o cover mínimo)
+    base = max(tw / sw, th / sh) * zoom
+    nw, nh = int(sw * base), int(sh * base)
+    resized = src.resize((nw, nh), Image.Resampling.LANCZOS)
+    cx, cy = int(nw * focus[0]), int(nh * focus[1])
+    # rosto a ~28% do topo do quadro
+    left = max(0, min(cx - tw // 2, nw - tw))
+    top = max(0, min(cy - int(th * 0.28), nh - th))
+    return resized.crop((left, top, left + tw, top + th))
+
+
+def band_header(draw: ImageDraw.ImageDraw, label: str):
+    """Faixa superior idêntica na frente e no verso."""
+    draw.rectangle((0, 0, W, 96), fill=BLUE_BAND)
+    center_text(draw, label, 28, fnt(F_BOLD, 36), WHITE)
+
+
+def band_footer(draw: ImageDraw.ImageDraw, label: str):
+    """Faixa inferior idêntica na frente e no verso."""
+    draw.rectangle((0, H - 100, W, H), fill=BLUE_BAND)
+    center_text(draw, label, H - 68, fnt(F_BLACK, 42), WHITE)
+
+
+def number_badge(draw, cx, cy, size=220, digits="67"):
+    """Bloco de número — elemento mais forte da peça (padrão BR)."""
+    half = size // 2
+    box = (cx - half - 20, cy - half + 10, cx + half + 20, cy + half - 10)
+    draw.rounded_rectangle(box, radius=28, fill=YELLOW)
+    draw.rounded_rectangle(box, radius=28, outline=NAVY, width=6)
+    font = fnt(F_NUM, int(size * 0.95))
+    tw = text_w(draw, digits, font)
+    th = text_h(draw, digits, font)
+    draw.text((cx - tw // 2, cy - th // 2 - 12), digits, font=font, fill=NAVY)
+
+
+def make_frente(photo_path: Path, out_path: Path, *, nova: bool):
     photo = Image.open(photo_path).convert("RGB")
-    img = gradient_bg(NAVY, (10, 39, 72))
+    img = Image.new("RGB", (W, H), PAPER)
     draw = ImageDraw.Draw(img)
 
-    # top bar
-    draw.rectangle((0, 0, W, 110), fill=BLUE)
-    f_small = font(FONT_BOLD, 34)
-    text_center(draw, "PAUPITEIROS  ·  ADMINISTRADOR", 38, f_small, WHITE)
+    band_header(draw, "PAUPITEIROS  ·  ADMINISTRADOR")
 
-    # photo area
-    margin = 70
-    photo_top = 150
-    photo_h = 820 if not nova else 760
-    paste_photo(
-        img,
-        photo,
-        (margin, photo_top, W - margin, photo_top + photo_h),
-        focus=focus,
-        radius=32,
-        border=10,
-    )
-
-    # name block
-    y = photo_top + photo_h + 40
-    f_name = font(FONT_BLACK, 92)
-    text_center(draw, "FETO", y, f_name, WHITE)
-    y += 100
-    f_sub = font(FONT_REG, 36)
-    text_center(draw, "Ruan Ranison", y, f_sub, (200, 220, 245))
-    y += 55
-
-    # number badge
-    badge_w, badge_h = 280, 140
-    bx = (W - badge_w) // 2
-    by = y + 10
-    draw.rounded_rectangle((bx, by, bx + badge_w, by + badge_h), radius=24, fill=BLUE_BRIGHT)
-    f_num = font(FONT_NUM, 120)
-    nb = draw.textbbox((0, 0), "67", font=f_num)
-    draw.text(
-        (bx + (badge_w - (nb[2] - nb[0])) // 2, by + (badge_h - (nb[3] - nb[1])) // 2 - 8),
-        "67",
-        font=f_num,
-        fill=WHITE,
-    )
-
-    y = by + badge_h + 28
+    # Foto grande (padrão “foto grande”): quase meia peça, close no rosto
+    margin = 48
+    photo_top = 118
+    photo_h = 720
+    pw, ph = W - 2 * margin, photo_h
     if nova:
-        f_vice = font(FONT_BOLD, 28)
-        y = wrap_center(
-            draw,
-            "Chapa: Doson's de Oliveira Vitor  ·  José Marcos Correia dos Santos",
-            y,
-            f_vice,
-            (180, 210, 245),
-            W - 100,
-            line_gap=6,
-        )
-        y += 8
-        f_slog = font(FONT_BOLD, 30)
-        wrap_center(draw, "Fim da 424  ·  Nova era da 924", y, f_slog, GREEN_SOFT, W - 120)
+        crop = face_crop(photo, pw, ph, focus=(0.68, 0.48), zoom=1.45)
     else:
-        f_slog = font(FONT_BOLD, 32)
-        text_center(draw, "Presença, regra e grupo", y, f_slog, (180, 210, 245))
+        crop = face_crop(photo, pw, ph, focus=(0.50, 0.48), zoom=1.65)
 
-    # bottom strip
-    draw.rectangle((0, H - 70, W, H), fill=BLUE_BRIGHT)
-    text_center(draw, "VOTE  67", H - 52, font(FONT_BLACK, 36), WHITE)
-
-    img.save(out_path, "PNG", optimize=True)
-    print("wrote", out_path)
-
-
-def make_verso(out_path: Path, *, nova: bool):
-    img = gradient_bg(GREEN_URN, (8, 50, 30))
+    # moldura branca + filete azul (clássico)
+    frame = (margin - 8, photo_top - 8, margin + pw + 8, photo_top + ph + 8)
+    draw.rounded_rectangle(frame, radius=18, fill=WHITE, outline=BLUE_BRIGHT, width=8)
+    img.paste(crop, (margin, photo_top))
     draw = ImageDraw.Draw(img)
-
-    # header COLA
-    draw.rounded_rectangle((60, 80, W - 60, 220), radius=20, fill=(10, 60, 35))
-    f_cola = font(FONT_BLACK, 96)
-    text_center(draw, "COLA", 105, f_cola, GREEN_SOFT)
-
-    f_hint = font(FONT_BOLD, 32)
-    text_center(draw, "Na urna, digite o número", 250, f_hint, (180, 240, 190))
-
-    # huge number
-    f_huge = font(FONT_NUM, 420)
-    nb = draw.textbbox((0, 0), "67", font=f_huge)
-    tw, th = nb[2] - nb[0], nb[3] - nb[1]
-    # soft glow plate
-    plate = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    pd = ImageDraw.Draw(plate)
-    pd.rounded_rectangle(
-        ((W - tw) // 2 - 40, 340, (W + tw) // 2 + 40, 340 + th + 60),
-        radius=36,
-        fill=(255, 255, 255, 28),
+    draw.rounded_rectangle(
+        (margin, photo_top, margin + pw, photo_top + ph),
+        radius=12,
+        outline=BLUE_BRIGHT,
+        width=5,
     )
-    img = Image.alpha_composite(img.convert("RGBA"), plate).convert("RGB")
-    draw = ImageDraw.Draw(img)
-    draw.text(((W - tw) // 2, 360), "67", font=f_huge, fill=WHITE)
 
-    y = 360 + th + 50
-    f_name = font(FONT_BLACK, 64)
-    text_center(draw, "FETO", y, f_name, GREEN_SOFT)
-    y += 80
-    f_sub = font(FONT_REG, 34)
-    text_center(draw, "Ruan Ranison", y, f_sub, (200, 235, 210))
-    y += 60
+    # Bloco inferior (mesmo papel do verso)
+    y = photo_top + ph + 36
+    center_text(draw, "FETO", y, fnt(F_BLACK, 96), NAVY)
+    y += 100
+    center_text(draw, "Ruan Ranison", y, fnt(F_REG, 38), MUTED)
+    y += 70
+
+    number_badge(draw, W // 2, y + 90, size=200)
+    y += 210
 
     if nova:
-        f_v = font(FONT_BOLD, 30)
         y = wrap_center(
             draw,
             "Vices: Doson's de Oliveira Vitor  ·  José Marcos Correia dos Santos",
             y,
-            f_v,
-            (190, 230, 200),
-            W - 100,
+            fnt(F_BOLD, 26),
+            BLUE,
+            W - 90,
         )
-        y += 20
-        f_s = font(FONT_BLACK, 36)
-        wrap_center(draw, "Fim da 424 no poder. Nova era da 924.", y, f_s, WHITE, W - 100)
-    else:
-        f_s = font(FONT_BOLD, 34)
+        y += 10
         wrap_center(
             draw,
-            "Administrador do Paupiteiros. Presença, regra e grupo.",
+            "Fim da 424  ·  Nova era da 924",
             y,
-            f_s,
-            (200, 235, 210),
-            W - 100,
+            fnt(F_BOLD, 30),
+            NAVY,
+            W - 90,
+        )
+    else:
+        center_text(draw, "Presença, regra e grupo", y, fnt(F_BOLD, 32), BLUE)
+
+    band_footer(draw, "VOTE  67")
+    img.save(out_path, "PNG", optimize=True)
+    print("wrote", out_path.name)
+
+
+def make_verso(out_path: Path, *, nova: bool):
+    """Verso/cola — mesma identidade da frente (faixas azul + papel + número amarelo)."""
+    img = Image.new("RGB", (W, H), PAPER)
+    draw = ImageDraw.Draw(img)
+
+    band_header(draw, "COLA  ·  PAUPITEIROS")
+
+    # Card central — cola clássica (mesmo visual da frente)
+    card = (56, 130, W - 56, H - 130)
+    draw.rounded_rectangle(card, radius=28, fill=WHITE, outline=BLUE_BRIGHT, width=6)
+
+    y = 175
+    center_text(draw, "Na urna, digite o número", y, fnt(F_BOLD, 36), MUTED)
+    y += 80
+
+    # Número gigante — hierarquia máxima (Printi/Expo)
+    number_badge(draw, W // 2, y + 180, size=380)
+    y += 400
+
+    center_text(draw, "FETO", y, fnt(F_BLACK, 96), NAVY)
+    y += 105
+    center_text(draw, "Ruan Ranison", y, fnt(F_REG, 38), MUTED)
+    y += 58
+    center_text(draw, "Administrador", y, fnt(F_BOLD, 34), BLUE)
+    y += 80
+
+    if nova:
+        y = wrap_center(
+            draw,
+            "Vices: Doson's de Oliveira Vitor  ·  José Marcos Correia dos Santos",
+            y,
+            fnt(F_BOLD, 28),
+            NAVY,
+            W - 140,
+        )
+        y += 22
+        wrap_center(
+            draw,
+            "Fim da 424 no poder. Nova era da 924.",
+            y,
+            fnt(F_BOLD, 32),
+            BLUE,
+            W - 140,
+        )
+    else:
+        wrap_center(
+            draw,
+            "Presença, regra e grupo em primeiro lugar.",
+            y,
+            fnt(F_BOLD, 34),
+            BLUE,
+            W - 140,
         )
 
-    # footer
-    draw.rectangle((0, H - 90, W, H), fill=GREEN_OK)
-    text_center(draw, "CONFIRMA  ·  VOTE 67", H - 62, font(FONT_BLACK, 38), WHITE)
+    # Faixa interna amarela (eco do badge — fecha o verso sem “vazio”)
+    draw.rounded_rectangle((100, H - 250, W - 100, H - 170), radius=18, fill=YELLOW, outline=NAVY, width=4)
+    center_text(draw, "MEMORIZE:  67", H - 228, fnt(F_BLACK, 44), NAVY)
 
+    band_footer(draw, "CONFIRMA  ·  67")
     img.save(out_path, "PNG", optimize=True)
-    print("wrote", out_path)
+    print("wrote", out_path.name)
 
 
 def main():
@@ -270,20 +245,9 @@ def main():
     antiga = ROOT / "assets" / "feto-antiga.jpg"
     nova = ROOT / "assets" / "feto.jpg"
 
-    make_frente(
-        antiga,
-        OUT / "santinho-foto-antiga-frente.png",
-        nova=False,
-        focus=(0.50, 0.48),
-    )
+    make_frente(antiga, OUT / "santinho-foto-antiga-frente.png", nova=False)
     make_verso(OUT / "santinho-foto-antiga-verso.png", nova=False)
-
-    make_frente(
-        nova,
-        OUT / "santinho-foto-nova-frente.png",
-        nova=True,
-        focus=(0.68, 0.40),
-    )
+    make_frente(nova, OUT / "santinho-foto-nova-frente.png", nova=True)
     make_verso(OUT / "santinho-foto-nova-verso.png", nova=True)
 
 
