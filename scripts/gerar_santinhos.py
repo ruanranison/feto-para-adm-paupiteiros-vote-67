@@ -74,16 +74,22 @@ def wrap_center(draw, text, y, font, fill, max_w, gap=6):
     return cy
 
 
-def face_crop(src: Image.Image, tw: int, th: int, focus=(0.5, 0.42), zoom=1.35) -> Image.Image:
-    """Close crop estilo santinho: rosto grande, quase sem parede acima."""
+def face_crop(
+    src: Image.Image,
+    tw: int,
+    th: int,
+    focus=(0.5, 0.42),
+    zoom=1.0,
+    anchor=0.35,
+) -> Image.Image:
+    """Cover-crop. zoom=1.0 enquadra o grupo inteiro; >1 fecha no rosto."""
     sw, sh = src.size
     base = max(tw / sw, th / sh) * zoom
     nw, nh = int(sw * base), int(sh * base)
     resized = src.resize((nw, nh), Image.Resampling.LANCZOS)
     cx, cy = int(nw * focus[0]), int(nh * focus[1])
-    # rosto bem alto no quadro (~18% do topo)
     left = max(0, min(cx - tw // 2, nw - tw))
-    top = max(0, min(cy - int(th * 0.18), nh - th))
+    top = max(0, min(cy - int(th * anchor), nh - th))
     return resized.crop((left, top, left + tw, top + th))
 
 
@@ -118,58 +124,59 @@ def make_frente(photo_path: Path, out_path: Path, *, nova: bool):
 
     band_header(draw, "PAUPITEIROS  ·  ADMINISTRADOR")
 
-    # Foto grande (padrão “foto grande”): quase meia peça, close no rosto
-    margin = 48
-    photo_top = 118
-    photo_h = 720
+    # Foto: grupo = enquadramento aberto (3 rostos); solo = close
+    margin = 52
+    photo_top = 124
+    photo_h = 640 if nova else 680
     pw, ph = W - 2 * margin, photo_h
     if nova:
-        crop = face_crop(photo, pw, ph, focus=(0.70, 0.55), zoom=1.55)
+        # Grupo inteiro visível; sobe um pouco os rostos na moldura
+        crop = face_crop(photo, pw, ph, focus=(0.50, 0.52), zoom=1.02, anchor=0.42)
     else:
-        crop = face_crop(photo, pw, ph, focus=(0.50, 0.58), zoom=1.90)
+        # Solo: close sem cortar testa/queixo
+        crop = face_crop(photo, pw, ph, focus=(0.50, 0.46), zoom=1.22, anchor=0.32)
 
-    # moldura branca + filete azul (clássico)
-    frame = (margin - 8, photo_top - 8, margin + pw + 8, photo_top + ph + 8)
-    draw.rounded_rectangle(frame, radius=18, fill=WHITE, outline=BLUE_BRIGHT, width=8)
+    frame = (margin - 6, photo_top - 6, margin + pw + 6, photo_top + ph + 6)
+    draw.rounded_rectangle(frame, radius=16, fill=WHITE, outline=BLUE_BRIGHT, width=7)
     img.paste(crop, (margin, photo_top))
     draw = ImageDraw.Draw(img)
     draw.rounded_rectangle(
         (margin, photo_top, margin + pw, photo_top + ph),
-        radius=12,
+        radius=10,
         outline=BLUE_BRIGHT,
-        width=5,
+        width=4,
     )
 
-    # Bloco inferior (mesmo papel do verso)
-    y = photo_top + ph + 36
-    center_text(draw, "FETO", y, fnt(F_BLACK, 96), NAVY)
-    y += 100
-    center_text(draw, "Ruan Ranison", y, fnt(F_REG, 38), MUTED)
-    y += 70
+    # Bloco de texto com respiros fixos e equilibrados
+    y = photo_top + ph + 32
+    center_text(draw, "FETO", y, fnt(F_BLACK, 84), NAVY)
+    y += 88
+    center_text(draw, "Ruan Ranison", y, fnt(F_REG, 34), MUTED)
+    y += 52
 
-    number_badge(draw, W // 2, y + 90, size=200)
-    y += 210
+    number_badge(draw, W // 2, y + 78, size=168)
+    y += 168
 
     if nova:
+        y += 8
         y = wrap_center(
             draw,
             "Vices: Doson's de Oliveira Vitor  ·  José Marcos Correia dos Santos",
             y,
-            fnt(F_BOLD, 26),
+            fnt(F_BOLD, 25),
             BLUE,
-            W - 90,
+            W - 100,
+            gap=4,
         )
-        y += 10
-        wrap_center(
-            draw,
-            "Fim da 424  ·  Nova era da 924",
-            y,
-            fnt(F_BOLD, 30),
-            NAVY,
-            W - 90,
-        )
+        y += 14
+        wrap_center(draw, "Fim da 424  ·  Nova era da 924", y, fnt(F_BOLD, 28), NAVY, W - 100)
     else:
-        center_text(draw, "Presença, regra e grupo", y, fnt(F_BOLD, 32), BLUE)
+        y += 12
+        center_text(draw, "Presença, regra e grupo", y, fnt(F_BOLD, 30), BLUE)
+        y += 48
+        # faixa amarela para equilibrar o espaço (eco do verso)
+        draw.rounded_rectangle((140, y, W - 140, y + 64), radius=14, fill=YELLOW, outline=NAVY, width=4)
+        center_text(draw, "MEMORIZE:  67", y + 14, fnt(F_BLACK, 36), NAVY)
 
     band_footer(draw, "VOTE  67")
     img.save(out_path, "PNG", optimize=True)
