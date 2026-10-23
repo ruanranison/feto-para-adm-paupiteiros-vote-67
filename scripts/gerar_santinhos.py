@@ -50,8 +50,13 @@ def gradient_bg(top=NAVY, bottom=NAVY_MID) -> Image.Image:
     return img
 
 
-def cover_crop(src: Image.Image, box: tuple[int, int, int, int], focus=(0.5, 0.35)) -> Image.Image:
-    """Crop-cover into box with focus (fx, fy) in 0..1 of source."""
+def cover_crop(
+    src: Image.Image,
+    box: tuple[int, int, int, int],
+    focus=(0.5, 0.35),
+    face_in_frame=0.32,
+) -> Image.Image:
+    """Crop-cover into box; place focus point near upper third of the frame."""
     x0, y0, x1, y1 = box
     tw, th = x1 - x0, y1 - y0
     sw, sh = src.size
@@ -60,7 +65,8 @@ def cover_crop(src: Image.Image, box: tuple[int, int, int, int], focus=(0.5, 0.3
     resized = src.resize((nw, nh), Image.Resampling.LANCZOS)
     cx, cy = int(nw * focus[0]), int(nh * focus[1])
     left = max(0, min(cx - tw // 2, nw - tw))
-    top = max(0, min(cy - th // 2, nh - th))
+    # face_in_frame: 0 = top, 0.5 = center — keep face high in the card
+    top = max(0, min(cy - int(th * face_in_frame), nh - th))
     cropped = resized.crop((left, top, left + tw, top + th))
     return cropped
 
@@ -268,7 +274,7 @@ def main():
         antiga,
         OUT / "santinho-foto-antiga-frente.png",
         nova=False,
-        focus=(0.50, 0.52),
+        focus=(0.50, 0.48),
     )
     make_verso(OUT / "santinho-foto-antiga-verso.png", nova=False)
 
@@ -276,7 +282,7 @@ def main():
         nova,
         OUT / "santinho-foto-nova-frente.png",
         nova=True,
-        focus=(0.68, 0.42),
+        focus=(0.68, 0.40),
     )
     make_verso(OUT / "santinho-foto-nova-verso.png", nova=True)
 
