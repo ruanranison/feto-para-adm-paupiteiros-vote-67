@@ -130,11 +130,11 @@ def make_frente(photo_path: Path, out_path: Path, *, nova: bool):
     photo_h = 640 if nova else 680
     pw, ph = W - 2 * margin, photo_h
     if nova:
-        # Grupo inteiro visível; sobe um pouco os rostos na moldura
-        crop = face_crop(photo, pw, ph, focus=(0.50, 0.52), zoom=1.02, anchor=0.42)
+        # Trio completo: começa perto do topo da foto (não cortar testa)
+        crop = face_crop(photo, pw, ph, focus=(0.50, 0.34), zoom=1.0, anchor=0.40)
     else:
-        # Solo: close sem cortar testa/queixo
-        crop = face_crop(photo, pw, ph, focus=(0.50, 0.46), zoom=1.22, anchor=0.32)
+        # Solo: leve close, testa e ombros visíveis
+        crop = face_crop(photo, pw, ph, focus=(0.50, 0.40), zoom=1.08, anchor=0.34)
 
     frame = (margin - 6, photo_top - 6, margin + pw + 6, photo_top + ph + 6)
     draw.rounded_rectangle(frame, radius=16, fill=WHITE, outline=BLUE_BRIGHT, width=7)
@@ -147,18 +147,17 @@ def make_frente(photo_path: Path, out_path: Path, *, nova: bool):
         width=4,
     )
 
-    # Bloco de texto com respiros fixos e equilibrados
-    y = photo_top + ph + 32
-    center_text(draw, "FETO", y, fnt(F_BLACK, 84), NAVY)
-    y += 88
+    # Bloco de texto — passos fixos (evita overlap de fontes)
+    y = photo_top + ph + 36
+    center_text(draw, "FETO", y, fnt(F_BLACK, 80), NAVY)
+    y += 96
     center_text(draw, "Ruan Ranison", y, fnt(F_REG, 34), MUTED)
-    y += 52
+    y += 56
 
     number_badge(draw, W // 2, y + 78, size=168)
-    y += 168
+    y += 172
 
     if nova:
-        y += 8
         y = wrap_center(
             draw,
             "Vices: Doson's de Oliveira Vitor  ·  José Marcos Correia dos Santos",
@@ -168,13 +167,11 @@ def make_frente(photo_path: Path, out_path: Path, *, nova: bool):
             W - 100,
             gap=4,
         )
-        y += 14
+        y += 16
         wrap_center(draw, "Fim da 424  ·  Nova era da 924", y, fnt(F_BOLD, 28), NAVY, W - 100)
     else:
-        y += 12
         center_text(draw, "Presença, regra e grupo", y, fnt(F_BOLD, 30), BLUE)
-        y += 48
-        # faixa amarela para equilibrar o espaço (eco do verso)
+        y += 52
         draw.rounded_rectangle((140, y, W - 140, y + 64), radius=14, fill=YELLOW, outline=NAVY, width=4)
         center_text(draw, "MEMORIZE:  67", y + 14, fnt(F_BLACK, 36), NAVY)
 
