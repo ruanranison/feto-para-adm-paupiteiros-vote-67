@@ -75,16 +75,15 @@ def wrap_center(draw, text, y, font, fill, max_w, gap=6):
 
 
 def face_crop(src: Image.Image, tw: int, th: int, focus=(0.5, 0.42), zoom=1.35) -> Image.Image:
-    """Close crop estilo santinho: rosto grande, pouco fundo acima."""
+    """Close crop estilo santinho: rosto grande, quase sem parede acima."""
     sw, sh = src.size
-    # zoom > 1 = mais close (escala maior que o cover mínimo)
     base = max(tw / sw, th / sh) * zoom
     nw, nh = int(sw * base), int(sh * base)
     resized = src.resize((nw, nh), Image.Resampling.LANCZOS)
     cx, cy = int(nw * focus[0]), int(nh * focus[1])
-    # rosto a ~28% do topo do quadro
+    # rosto bem alto no quadro (~18% do topo)
     left = max(0, min(cx - tw // 2, nw - tw))
-    top = max(0, min(cy - int(th * 0.28), nh - th))
+    top = max(0, min(cy - int(th * 0.18), nh - th))
     return resized.crop((left, top, left + tw, top + th))
 
 
@@ -125,9 +124,9 @@ def make_frente(photo_path: Path, out_path: Path, *, nova: bool):
     photo_h = 720
     pw, ph = W - 2 * margin, photo_h
     if nova:
-        crop = face_crop(photo, pw, ph, focus=(0.68, 0.48), zoom=1.45)
+        crop = face_crop(photo, pw, ph, focus=(0.70, 0.55), zoom=1.55)
     else:
-        crop = face_crop(photo, pw, ph, focus=(0.50, 0.48), zoom=1.65)
+        crop = face_crop(photo, pw, ph, focus=(0.50, 0.58), zoom=1.90)
 
     # moldura branca + filete azul (clássico)
     frame = (margin - 8, photo_top - 8, margin + pw + 8, photo_top + ph + 8)
