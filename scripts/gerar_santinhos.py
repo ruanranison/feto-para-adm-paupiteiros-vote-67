@@ -126,15 +126,14 @@ def make_frente(photo_path: Path, out_path: Path, *, nova: bool):
 
     # Foto: grupo = enquadramento aberto (3 rostos); solo = close
     margin = 52
-    photo_top = 124
-    photo_h = 640 if nova else 680
+    photo_top = 120
+    # Grupo: moldura mais alta pra caber testa→queixo dos 3
+    photo_h = 700 if nova else 660
     pw, ph = W - 2 * margin, photo_h
     if nova:
-        # Trio completo: começa perto do topo da foto (não cortar testa)
-        crop = face_crop(photo, pw, ph, focus=(0.50, 0.34), zoom=1.0, anchor=0.40)
+        crop = face_crop(photo, pw, ph, focus=(0.50, 0.42), zoom=1.0, anchor=0.45)
     else:
-        # Solo: leve close, testa e ombros visíveis
-        crop = face_crop(photo, pw, ph, focus=(0.50, 0.40), zoom=1.08, anchor=0.34)
+        crop = face_crop(photo, pw, ph, focus=(0.50, 0.42), zoom=1.10, anchor=0.34)
 
     frame = (margin - 6, photo_top - 6, margin + pw + 6, photo_top + ph + 6)
     draw.rounded_rectangle(frame, radius=16, fill=WHITE, outline=BLUE_BRIGHT, width=7)
