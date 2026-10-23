@@ -268,7 +268,7 @@ def main():
         antiga,
         OUT / "santinho-foto-antiga-frente.png",
         nova=False,
-        focus=(0.50, 0.38),
+        focus=(0.50, 0.52),
     )
     make_verso(OUT / "santinho-foto-antiga-verso.png", nova=False)
 
@@ -276,7 +276,7 @@ def main():
         nova,
         OUT / "santinho-foto-nova-frente.png",
         nova=True,
-        focus=(0.70, 0.28),
+        focus=(0.68, 0.42),
     )
     make_verso(OUT / "santinho-foto-nova-verso.png", nova=True)
 
